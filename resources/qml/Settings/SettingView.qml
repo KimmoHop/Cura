@@ -40,13 +40,13 @@ Item
         Cura.TextField
         {
             id: filter
-            height: parent.height
+            implicitHeight: parent.height
             anchors.left: parent.left
             anchors.right: parent.right
             topPadding: height / 4
             leftPadding: searchIcon.width + UM.Theme.getSize("default_margin").width * 2
             placeholderText: catalog.i18nc("@label:textbox", "Search settings")
-            font.italic: true
+            font: UM.Theme.getFont("default_italic")
 
             property var expandedCategories
             property bool lastFindingSettings: false
@@ -61,7 +61,7 @@ Item
                     left: parent.left
                     leftMargin: UM.Theme.getSize("default_margin").width
                 }
-                source: UM.Theme.getIcon("search")
+                source: UM.Theme.getIcon("Magnifier")
                 height: UM.Theme.getSize("small_button_icon").height
                 width: height
                 color: UM.Theme.getColor("text")
@@ -178,7 +178,7 @@ Item
     ListView
     {
         id: contents
-        maximumFlickVelocity: 1000
+        maximumFlickVelocity: 1000 * screenScaleFactor
         anchors
         {
             top: filterContainer.bottom
@@ -337,7 +337,7 @@ Item
                 }
                 function onShowTooltip(text) { base.showTooltip(delegate, Qt.point(-settingsView.x - UM.Theme.getSize("default_margin").width, 0), text) }
                 function onHideTooltip() { base.hideTooltip() }
-                function onShowAllHiddenInheritedSettings()
+                function onShowAllHiddenInheritedSettings(category_id)
                 {
                     var children_with_override = Cura.SettingInheritanceManager.getChildrenKeysWithOverride(category_id)
                     for(var i = 0; i < children_with_override.length; i++)

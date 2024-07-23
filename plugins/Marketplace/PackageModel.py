@@ -2,7 +2,6 @@
 #  Cura is released under the terms of the LGPLv3 or higher.
 
 import re
-from enum import Enum
 from typing import Any, cast, Dict, List, Optional
 
 from PyQt6.QtCore import pyqtProperty, QObject, pyqtSignal, pyqtSlot
@@ -12,7 +11,6 @@ from cura.CuraApplication import CuraApplication
 from cura.CuraPackageManager import CuraPackageManager
 from cura.Settings.CuraContainerRegistry import CuraContainerRegistry  # To get names of materials we're compatible with.
 from UM.i18n import i18nCatalog  # To translate placeholder names if data is not present.
-from UM.Logger import Logger
 from UM.PluginRegistry import PluginRegistry
 
 catalog = i18nCatalog("cura")
@@ -83,6 +81,30 @@ class PackageModel(QObject):
         self._package_manager.packagesWithUpdateChanged.connect(self._processUpdatedPackages)
 
         self._is_busy = False
+
+        self._is_missing_package_information = False
+
+    @classmethod
+    def fromIncompletePackageInformation(cls, display_name: str, package_version: str,
+                                         package_type: str) -> "PackageModel":
+        description = ""
+        match package_type:
+            case "material":
+                description = catalog.i18nc("@label:label Ultimaker Marketplace is a brand name, don't translate",
+                                            "The material package associated with the Cura project could not be found on the Ultimaker Marketplace. Use the partial material profile definition stored in the Cura project file at your own risk.")
+            case "plugin":
+                description = catalog.i18nc("@label:label Ultimaker Marketplace is a brand name, don't translate",
+                                            "The plugin associated with the Cura project could not be found on the Ultimaker Marketplace. As the plugin may be required to slice the project it might not be possible to correctly slice the file.")
+
+        package_data = {
+            "display_name": display_name,
+            "package_version": package_version,
+            "package_type": package_type,
+            "description": description,
+        }
+        package_model = cls(package_data)
+        package_model.setIsMissingPackageInformation(True)
+        return package_model
 
     @pyqtSlot()
     def _processUpdatedPackages(self):
@@ -385,3 +407,14 @@ class PackageModel(QObject):
     def canUpdate(self) -> bool:
         """Flag indicating if the package can be updated"""
         return self._can_update
+
+    isMissingPackageInformationChanged = pyqtSignal()
+
+    def setIsMissingPackageInformation(self, isMissingPackageInformation: bool) -> None:
+        self._is_missing_package_information = isMissingPackageInformation
+        self.isMissingPackageInformationChanged.emit()
+
+    @pyqtProperty(bool, notify=isMissingPackageInformationChanged)
+    def isMissingPackageInformation(self) -> bool:
+        """Flag indicating if the package can be updated"""
+        return self._is_missing_package_information

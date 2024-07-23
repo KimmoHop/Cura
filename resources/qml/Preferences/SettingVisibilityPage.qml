@@ -12,6 +12,8 @@ UM.PreferencesPage
 {
     title: catalog.i18nc("@title:tab", "Setting Visibility")
 
+    Item { enabled: false; UM.I18nCatalog { id: catalog; name: "cura"} }
+
     property QtObject settingVisibilityPresetsModel: CuraApplication.getSettingVisibilityPresetsModel()
 
     property int scrollToIndex: 0
@@ -121,7 +123,7 @@ UM.PreferencesPage
                 var idx = -1;
                 for(var i = 0; i < settingVisibilityPresetsModel.items.length; ++i)
                 {
-                    if(settingVisibilityPresetsModel.items[i].presetId == settingVisibilityPresetsModel.activePreset)
+                    if(settingVisibilityPresetsModel.items[i].presetId === settingVisibilityPresetsModel.activePreset)
                     {
                         idx = i;
                         break;
@@ -157,7 +159,7 @@ UM.PreferencesPage
                 id: definitionsModel
                 containerId: Cura.MachineManager.activeMachine != null ? Cura.MachineManager.activeMachine.definition.id: ""
                 showAll: true
-                exclude: ["machine_settings", "command_line_settings"]
+                exclude: ["machine_settings", "command_line_settings", "ppr"]
                 showAncestors: true
                 expanded: ["*"]
                 visibilityHandler: UM.SettingPreferenceVisibilityHandler {}
@@ -171,13 +173,13 @@ UM.PreferencesPage
                 id: loader
 
                 width: settingsListView.width - scrollBar.width
-                height: model.type != undefined ? UM.Theme.getSize("section").height : 0
+                height: model.type !== undefined ? UM.Theme.getSize("section").height : 0
 
                 property var definition: model
                 property var settingDefinitionsModel: definitionsModel
 
                 asynchronous: true
-                active: model.type != undefined
+                active: model.type !== undefined
                 sourceComponent:
                 {
                     switch (model.type)
